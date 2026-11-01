@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import { UserModel } from "../models/user.model";
 import { ArticleModel } from "../models/article.model";
+import mongoose from "mongoose";
 
 const cleanList = (value: string[], { lowercase = false } = {}) => {
     if (!Array.isArray(value)) return []
@@ -82,6 +83,61 @@ export const getAllArticles = async (req: Request, res: Response) => {
         }
         else {
             res.status(500).json({ message: "Internal Sever Error" })
+        }
+    }
+}
+
+export const getArticleById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({ error: "Invalid Article ID" })
+        }
+
+        const article = await ArticleModel.findById(id).populate("author", "name email")
+        if(!article){
+            return res.status(404).json({error: "Article Not Found"})
+        }
+
+        res.status(200).json(article)
+
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.log(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Server Error" })
+        }
+    }
+}
+
+export const getMyArticles = async (req: AuthRequest, res: Response) => {
+    try{
+        const userId = req.user?.sub
+        if(!userId) {
+            return res.status(401).json({error: "Unauthorized"})
+        }
+
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const articles = await ArticleModel.find({author: userId})
+            .sort({createdAt: -1})
+            .skip(skip)
+            .limit(limit)
+
+        res.status(200).json(articles)
+    }
+    catch(err: any){
+        if (err.message) {
+            console.log(err)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Server Error" })
         }
     }
 }
