@@ -52,6 +52,36 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     }
     catch (err: any) {
         console.log(err)
-        res.status(500).json({ error: err.message })
+        res.status(500).json({ error: err.message ? err.message : "Internal Sever Error" })
+    }
+}
+
+export const getAllArticles = async (req: Request, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const articles = await ArticleModel.find({ isActive: true })
+            .populate("author", "name email")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+
+        const total = await ArticleModel.countDocuments({ isActive: true })
+
+        res.status(200).json({
+            data: articles,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        })
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.error(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Sever Error" })
+        }
     }
 }
