@@ -141,3 +141,31 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
         }
     }
 }
+
+export const changeActive = async(req: AuthRequest, res: Response) => {
+    try{
+        const {id} = req.params
+        if(!mongoose.isValidObjectId(id)){
+            return res.status(400).json({error: "Invalid Article ID"})
+        }
+
+        const article = await ArticleModel.findById(id)
+        if(!article){
+            return res.status(404).json({error: "Article not found"})
+        }
+
+        article.isActive = !article.isActive
+        await article.save()
+
+        res.status(200).json(article)
+    }
+    catch(err: any){
+        if (err.message) {
+            console.log(err)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Server Error" })
+        }
+    }
+}
