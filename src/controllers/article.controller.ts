@@ -25,6 +25,7 @@ const cleanList = (value: string[], { lowercase = false } = {}) => {
 export const createArticle = async (req: AuthRequest, res: Response) => {
     try {
         const { title, content, gameNames, tags } = req.body
+
         if (typeof title !== "string" || !title.trim()) {
             return res.status(400).json({ message: "Title is required." });
         }
@@ -38,13 +39,13 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
         const user = await UserModel.findById(userId).select("-password")
         if (!user) { return res.status(404).json({ message: "User not found" }) }
 
-        const coverImageUrl = ""
+        const coverImageUrl = "" 
 
         const article = await ArticleModel.create({
             title,
             content,
-            gameNames: cleanList(gameNames),
-            tags: cleanList(tags, { lowercase: true }),
+            gameNames: cleanList(JSON.parse(gameNames)),
+            tags: cleanList(JSON.parse(tags), { lowercase: true }),
             coverImageUrl,
             author: user._id,
         })
