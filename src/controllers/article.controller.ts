@@ -222,16 +222,19 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: "Article not found" })
         }
 
+        let isLiked = false
         const index = article.likes.indexOf(userId as any)
+
         if (index === -1) {
             article.likes.push(userId as any)
+            isLiked = true
         }
         else {
             article.likes.splice(index, 1)
         }
 
         await article.save()
-        res.status(200).json(article)
+        res.status(200).json({likes: article.likes, isLiked: isLiked})
     }
     catch (err: any) {
         console.log(err)
