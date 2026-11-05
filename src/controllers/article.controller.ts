@@ -3,6 +3,7 @@ import { AuthRequest } from "../middleware/auth";
 import { UserModel } from "../models/user.model";
 import { ArticleModel } from "../models/article.model";
 import mongoose from "mongoose";
+import { error } from "console";
 
 const cleanList = (value: string[], { lowercase = false } = {}) => {
     if (!Array.isArray(value)) return []
@@ -205,5 +206,35 @@ export const changeActive = async (req: AuthRequest, res: Response) => {
         else {
             res.status(500).json({ message: "Internal Server Error" })
         }
+    }
+}
+
+export const toggleLike = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params
+        const userId = req.user?.sub
+        if (!userId || !mongoose.isValidObjectId(id)) {
+            return res.status(400).json({ message: "Invalid Request" })
+        }
+
+        const article = await ArticleModel.findById(id)
+        if (!article) {
+            return res.status(404).json({ message: "Article not found" })
+        }
+
+        const index = article.likes.indexOf(userId as any)
+        if (index === -1) {
+            article.likes.push(userId as any)
+        }
+        else {
+            article.likes.splice(index, 1)
+        }
+
+        await article.save()
+        res.status(200).json(article)
+    }
+    catch (err: any) {
+        console.log(err)
+        res.status(500).json({ message: err.message ? err.message : "Internal server error" })
     }
 }
