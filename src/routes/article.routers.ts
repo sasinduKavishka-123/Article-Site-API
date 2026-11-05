@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth";
 import { requireRole } from "../middleware/role"
 import { UserRole } from "../models/user.model";
-import { changeActive, createArticle, getAllArticles, getArticleById, getMyArticles, likeArticle, toggleLike, updateArticle } from "../controllers/article.controller";
+import { changeActive, createArticle, getAllArticles, getArticleById, getMyArticles, toggleLike, updateArticle } from "../controllers/article.controller";
 import { upload } from "../middleware/upload"
 
 const router = Router()

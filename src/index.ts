@@ -4,6 +4,7 @@ import mongoose from "mongoose"
 import cors from "cors"
 import AuthRouter from "./routes/auth.routers"
 import ArticleRouter from "./routes/article.routers"
+import CommentRouter from "./routes/comment.routers"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -17,6 +18,7 @@ app.use(express.json())
 
 app.use("/api/v1/auth", AuthRouter)
 app.use("/api/v1/articles", ArticleRouter)
+app.use("/api/v1/comments", CommentRouter)
 
 mongoose
     .connect(MONGO_URL)
