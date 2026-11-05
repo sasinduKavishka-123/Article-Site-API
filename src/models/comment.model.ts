@@ -19,4 +19,4 @@ const commentSchema = new Schema<IComment>(
     { timestamps: true }
 )
 
-export const commentModel = model<IComment>("comments", commentSchema)
+export const CommentModel = model<IComment>("comments", commentSchema)
