@@ -234,7 +234,7 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
         }
 
         await article.save()
-        res.status(200).json({likes: article.likes, isLiked: isLiked})
+        res.status(200).json({ likes: article.likes, isLiked: isLiked })
     }
     catch (err: any) {
         console.log(err)
@@ -242,10 +242,27 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
     }
 }
 
-export const getArticleCount = async(req: Request, res: Response)=>{
-    try{
+export const getArticleCount = async (req: Request, res: Response) => {
+    try {
         const count = await ArticleModel.countDocuments({})
         res.status(200).json(count)
+    }
+    catch (err: any) {
+        console.log(err)
+        res.status(500).json({ message: err.message ? err.message : "Internal server error" })
+    }
+}
+
+export const getMostLikedArticles = async (req: Request, res: Response) => {
+    try {
+        const mostLiked = await ArticleModel.aggregate([
+            { $match: { isActive: true } },
+            { $addFields: { likesCount: { $size: { $ifNull: ["$likes", []] } } } },
+            { $sort: { likesCount: -1 } },
+            { $limit: 3 },
+        ]);
+
+        res.status(200).json(mostLiked)
     }
     catch (err: any) {
         console.log(err)
