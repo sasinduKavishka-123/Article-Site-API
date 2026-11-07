@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth";
 import { requireRole } from "../middleware/role";
 import { UserRole } from "../models/user.model";
-import { createComment, deleteComment, getCommentsByArticle } from "../controllers/comment.controller";
+import { createComment, deleteComment, getAllCommentCount, getCommentsByArticle } from "../controllers/comment.controller";
 
 const router = Router()
 
@@ -12,6 +12,8 @@ router.post(
     requireRole([UserRole.ADMIN, UserRole.USER]),
     createComment
 )
+
+router.get("/countAll", getAllCommentCount)
 
 router.get("/:articleId", getCommentsByArticle)
 

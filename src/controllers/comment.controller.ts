@@ -80,3 +80,14 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: err.message ? err.message : "Internal server error" })
     }
 }
+
+
+export const getAllCommentCount = async (req: Request, res: Response) => {
+    try{
+        const count = await CommentModel.countDocuments({})
+        res.status(200).json(count)
+    }
+    catch(err: any){
+        res.status(500).json({message: err.message? err.message: "Internal Server Error"})
+    }
+}

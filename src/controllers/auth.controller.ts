@@ -121,7 +121,7 @@ export const getRefreshToken = async (req: Request, res: Response) => {
 export const getAllUsersCount = async (req: Request, res: Response) => {
     try {
         const count = await UserModel.countDocuments({})
-        return res.status(200).json({data: count})
+        return res.status(200).json(count)
     }
     catch (err: any) {
         res.status(403).json({ message: err.message ? err.message : "Invalid or expired token" })

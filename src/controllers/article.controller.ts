@@ -245,7 +245,7 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
 export const getArticleCount = async(req: Request, res: Response)=>{
     try{
         const count = await ArticleModel.countDocuments({})
-        res.status(200).json({data: count})
+        res.status(200).json(count)
     }
     catch (err: any) {
         console.log(err)
