@@ -102,13 +102,15 @@ export const getAllArticles = async (req: Request, res: Response) => {
         const limit = parseInt(req.query.limit as string) || 10
         const skip = (page - 1) * limit
 
-        const articles = await ArticleModel.find({ isActive: true })
+        const isActive: any = req.query.isActive
+
+        const articles = await ArticleModel.find({ isActive: isActive })
             .populate("author", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
 
-        const total = await ArticleModel.countDocuments({ isActive: true })
+        const total = await ArticleModel.countDocuments({ isActive: isActive })
 
         res.status(200).json({
             data: articles,
@@ -259,7 +261,7 @@ export const getMostLikedArticles = async (req: Request, res: Response) => {
             { $match: { isActive: true } },
             { $addFields: { likesCount: { $size: { $ifNull: ["$likes", []] } } } },
             { $sort: { likesCount: -1 } },
-            { $limit: 3 },
+            { $limit: 5 },
         ]);
 
         res.status(200).json(mostLiked)
@@ -267,5 +269,59 @@ export const getMostLikedArticles = async (req: Request, res: Response) => {
     catch (err: any) {
         console.log(err)
         res.status(500).json({ message: err.message ? err.message : "Internal server error" })
+    }
+}
+
+export const getAllAdminArticles = async (req: AuthRequest, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const articles = await ArticleModel.find({})
+            .populate("author", "name email")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+
+        const total = await ArticleModel.countDocuments({})
+
+        res.status(200).json({
+            data: articles,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        })
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.error(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Sever Error" })
+        }
+    }
+}
+
+export const getArticlesPerTag = async (req: Request, res: Response) => {
+    try {
+        const articlesPerTag = await ArticleModel.aggregate([
+            { $match: { isActive: true } },
+            { $unwind: "$tags" },
+            { $group: { _id: "$tags", count: { $sum: 1 } } },
+            { $sort: { count: -1, _id: 1 } },
+            { $limit: 7 },
+            { $project: { _id: 0, tag: "$_id", count: 1 } },
+        ]);
+
+        res.status(200).json(articlesPerTag)
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.error(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Sever Error" })
+        }
     }
 }
