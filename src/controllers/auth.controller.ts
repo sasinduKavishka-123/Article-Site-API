@@ -11,17 +11,17 @@ export const register = async (req: Request, res: Response) => {
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Missing credentials" })
         }
-        
-        if(name.toString().length < 3){
-            return res.status(400).json({message: "Invalid User Name"})
+
+        if (name.toString().length < 3) {
+            return res.status(400).json({ message: "Invalid User Name" })
         }
-        if(password.toString().length < 6){
-            return res.status(400).json({message: "Invalid Password"})
+        if (password.toString().length < 6) {
+            return res.status(400).json({ message: "Invalid Password" })
         }
 
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if(!emailRegex.test(email.trim())){
-            return res.status(400).json({message: "Invalid Email"})
+        if (!emailRegex.test(email.trim())) {
+            return res.status(400).json({ message: "Invalid Email" })
         }
 
         const extUser = await UserModel.findOne({ email })
@@ -115,5 +115,15 @@ export const getRefreshToken = async (req: Request, res: Response) => {
         res.status(200).json({ data: { accessToken: signAccessToken(user) } })
     } catch (err) {
         res.status(403).json({ message: "Invalid or expired token" })
+    }
+}
+
+export const getAllUsersCount = async (req: Request, res: Response) => {
+    try {
+        const count = await UserModel.countDocuments({})
+        return res.status(200).json({data: count})
+    }
+    catch (err: any) {
+        res.status(403).json({ message: err.message ? err.message : "Invalid or expired token" })
     }
 }

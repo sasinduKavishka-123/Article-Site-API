@@ -241,3 +241,14 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: err.message ? err.message : "Internal server error" })
     }
 }
+
+export const getArticleCount = async(req: Request, res: Response)=>{
+    try{
+        const count = await ArticleModel.countDocuments({})
+        res.status(200).json({data: count})
+    }
+    catch (err: any) {
+        console.log(err)
+        res.status(500).json({ message: err.message ? err.message : "Internal server error" })
+    }
+}
