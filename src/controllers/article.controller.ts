@@ -103,8 +103,16 @@ export const getAllArticles = async (req: Request, res: Response) => {
         const skip = (page - 1) * limit
 
         const isActive: any = req.query.isActive
+        const s = (req.query.search as string || "").trim()
 
-        const articles = await ArticleModel.find({ isActive: isActive })
+        const fixed = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        const regex = new RegExp(fixed, "i")
+
+        const articles = await ArticleModel
+            .find({
+                isActive: isActive,
+                $or: [{ gameNames: regex }, { tags: regex }, { title: regex }]
+            })
             .populate("author", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -278,7 +286,13 @@ export const getAllAdminArticles = async (req: AuthRequest, res: Response) => {
         const limit = parseInt(req.query.limit as string) || 10
         const skip = (page - 1) * limit
 
-        const articles = await ArticleModel.find({})
+        const s = (req.query.search as string || "").trim()
+        const fixed = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        const regex = new RegExp(fixed, "i") 
+
+        const articles = await ArticleModel.find({
+            $or: [{title: regex}, {gameNames: regex}, {tag: regex}]
+        })
             .populate("author", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
