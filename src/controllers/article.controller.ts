@@ -3,26 +3,10 @@ import { AuthRequest } from "../middleware/auth";
 import { UserModel } from "../models/user.model";
 import { ArticleModel } from "../models/article.model";
 import mongoose from "mongoose";
-import { error } from "console";
 import { uploadImage } from "../services/storage.service";
+import { cleanList, deleteImageByUrl } from "../util/article";
 
-const cleanList = (value: string[], { lowercase = false } = {}) => {
-    if (!Array.isArray(value)) return []
-    const seen = new Set()
-    const result = []
-
-    for (const item of value) {
-        if (typeof item !== "string") continue
-        let v = item.trim().replace(/\s+/g, " ")
-
-        if (lowercase) v = v.toLowerCase()
-        if (!v || seen.has(v.toLowerCase())) continue
-        seen.add(v.toLowerCase())
-        result.push(v)
-    }
-
-    return result
-};
+const BUCKET = "article_images"
 
 export const createArticle = async (req: AuthRequest, res: Response) => {
     try {
@@ -41,7 +25,7 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
         const user = await UserModel.findById(userId).select("-password")
         if (!user) { return res.status(404).json({ message: "User not found" }) }
 
-        const coverImageUrl = req.file ? await uploadImage(req.file, "article_images") : ""
+        const coverImageUrl = req.file ? await uploadImage(userId, req.file, BUCKET) : ""
 
         const article = await ArticleModel.create({
             title,
@@ -80,7 +64,9 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
         const article = await ArticleModel.findById(id)
         if (!article) { return res.status(404).json({ message: "Article not found" }) }
 
-        const coverImageUrl = ""
+        const oldUrl = article.coverImageUrl
+
+        const coverImageUrl = req.file ? await uploadImage(userId, req.file, "article_images") : ""
 
         article.title = title
         article.content = content
@@ -89,6 +75,12 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
         article.coverImageUrl = coverImageUrl
 
         const newArticle = await article.save()
+
+        if (oldUrl && oldUrl !== newArticle.coverImageUrl) {
+            await deleteImageByUrl(oldUrl, userId)
+
+        }
+
         res.status(200).json(newArticle)
     }
     catch (err: any) {

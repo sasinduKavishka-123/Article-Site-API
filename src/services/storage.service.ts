@@ -1,12 +1,13 @@
 import { supabase } from "../config/supabase"
 
 export const uploadImage = async (
+    userName: string,
     file: Express.Multer.File,
     bucketName: string = "article_images"
 ): Promise<string> => {
     const uuid = crypto.randomUUID()
     const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "-")
-    const fileName = `${uuid}-${sanitizedName}`
+    const fileName = `${userName}-${uuid}-${sanitizedName}`
 
     const { error } = await supabase.storage
         .from(bucketName)
