@@ -11,7 +11,7 @@ router.post(
     "/",
     authenticate,
     requireRole([UserRole.ADMIN, UserRole.USER]),
-    upload.single("image"),
+    upload.single("file"),
     createArticle
 )
 
@@ -19,7 +19,7 @@ router.put(
     "/",
     authenticate,
     requireRole([UserRole.ADMIN, UserRole.USER]),
-    upload.single("image"),
+    upload.single("file"),
     updateArticle
 )
 

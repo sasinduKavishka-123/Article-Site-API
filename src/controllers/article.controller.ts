@@ -4,6 +4,7 @@ import { UserModel } from "../models/user.model";
 import { ArticleModel } from "../models/article.model";
 import mongoose from "mongoose";
 import { error } from "console";
+import { uploadImage } from "../services/storage.service";
 
 const cleanList = (value: string[], { lowercase = false } = {}) => {
     if (!Array.isArray(value)) return []
@@ -40,7 +41,7 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
         const user = await UserModel.findById(userId).select("-password")
         if (!user) { return res.status(404).json({ message: "User not found" }) }
 
-        const coverImageUrl = ""
+        const coverImageUrl = req.file ? await uploadImage(req.file, "article_images") : ""
 
         const article = await ArticleModel.create({
             title,
@@ -288,10 +289,10 @@ export const getAllAdminArticles = async (req: AuthRequest, res: Response) => {
 
         const s = (req.query.search as string || "").trim()
         const fixed = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-        const regex = new RegExp(fixed, "i") 
+        const regex = new RegExp(fixed, "i")
 
         const articles = await ArticleModel.find({
-            $or: [{title: regex}, {gameNames: regex}, {tag: regex}]
+            $or: [{ title: regex }, { gameNames: regex }, { tag: regex }]
         })
             .populate("author", "name email")
             .sort({ createdAt: -1 })
