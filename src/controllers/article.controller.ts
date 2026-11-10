@@ -65,9 +65,9 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
         const article = await ArticleModel.findById(id)
         if (!article) { return res.status(404).json({ message: "Article not found" }) }
 
-        const oldUrl = article.coverImageUrl
+        const oldUrl = req.body.coverImageUrl ? article.coverImageUrl : ""
 
-        const coverImageUrl = req.file ? await uploadImage(userId, req.file, "article_images") : ""
+        const coverImageUrl = req.file ? await uploadImage(userId, req.file, "article_images") : oldUrl
 
         article.title = title
         article.content = content
