@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth";
 import { requireRole } from "../middleware/role"
 import { UserRole } from "../models/user.model";
-import { changeActive, createArticle, getAllAdminArticles, getAllArticles, getArticleById, getArticleCount, getArticlesPerTag, getMostLikedArticles, getMyArticles, toggleLike, updateArticle } from "../controllers/article.controller";
+import { changeActive, createArticle, getAiDescription, getAllAdminArticles, getAllArticles, getArticleById, getArticleCount, getArticlesPerTag, getMostLikedArticles, getMyArticles, toggleLike, updateArticle } from "../controllers/article.controller";
 import { upload } from "../middleware/upload"
 
 const router = Router()
@@ -14,6 +14,8 @@ router.post(
     upload.single("file"),
     createArticle
 )
+
+router.post("/generate-description", authenticate, getAiDescription)
 
 router.put(
     "/",

@@ -5,6 +5,7 @@ import { ArticleModel } from "../models/article.model";
 import mongoose from "mongoose";
 import { uploadImage } from "../services/storage.service";
 import { cleanList, deleteImageByUrl } from "../util/article";
+import { generateArticleDescription } from "../services/ai.service";
 
 const BUCKET = "article_images"
 
@@ -265,6 +266,8 @@ export const getMostLikedArticles = async (req: Request, res: Response) => {
             { $limit: 5 },
         ]);
 
+        await ArticleModel.populate(mostLiked, { path: "author", select: "name" });
+
         res.status(200).json(mostLiked)
     }
     catch (err: any) {
@@ -329,6 +332,26 @@ export const getArticlesPerTag = async (req: Request, res: Response) => {
         }
         else {
             res.status(500).json({ message: "Internal Sever Error" })
+        }
+    }
+}
+
+export const getAiDescription = async (req: Request, res: Response) => {
+    try{
+        const {title} = req.body
+        if (!title){
+            return res.status(400).json({ message: "Title is required" })
+        }
+        const description = await generateArticleDescription(title)
+        res.status(200).json({description})
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.error(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "AI generation failed" })
         }
     }
 }
