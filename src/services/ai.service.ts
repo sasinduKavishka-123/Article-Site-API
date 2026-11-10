@@ -55,7 +55,7 @@ export const generateArticleDescription = async (title: string): Promise<string>
                         config: {
                             systemInstruction: PROMPT,
                             temperature: 0.6,
-                            maxOutputTokens: 700,
+                            maxOutputTokens: 4000,
                             ...(thinkingLevel && { thinkingConfig: { thinkingLevel } })
                         }
                     }),
@@ -67,16 +67,6 @@ export const generateArticleDescription = async (title: string): Promise<string>
                     return text
                 }
                 break
-                // const response = await ai.models.generateContent({
-                //     model,
-                //     contents: PROMPT,
-                //     config: {
-                //         temperature: 0.6,
-                //         maxOutputTokens: 1000
-                //     }
-                // })
-                // const text = response.text?.trim()
-                // if (text) return text
             }
             catch (error: any) {
                 const status = error?.status ?? error?.error?.code;

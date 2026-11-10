@@ -259,6 +259,40 @@ export const getArticleCount = async (req: Request, res: Response) => {
 
 export const getMostLikedArticles = async (req: Request, res: Response) => {
     try {
+
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const mostLiked = await ArticleModel.aggregate([
+            { $match: { isActive: true } },
+            { $addFields: { likesCount: { $size: { $ifNull: ["$likes", []] } } } },
+            { $sort: { likesCount: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+        ]);
+
+        await ArticleModel.populate(mostLiked, { path: "author", select: "name" });
+        const total = await ArticleModel.countDocuments({ isActive: true })
+
+        res.status(200).json({
+            data: mostLiked,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        })
+    }
+    catch (err: any) {
+        if (err.message) {
+            console.error(err.message)
+            res.status(500).json({ message: err.message })
+        }
+        else {
+            res.status(500).json({ message: "Internal Sever Error" })
+        }
+    }
+}
+
+export const getMostLikedArticlesAdmin = async (req: Request, res: Response) => {
+    try {
         const mostLiked = await ArticleModel.aggregate([
             { $match: { isActive: true } },
             { $addFields: { likesCount: { $size: { $ifNull: ["$likes", []] } } } },
@@ -337,13 +371,13 @@ export const getArticlesPerTag = async (req: Request, res: Response) => {
 }
 
 export const getAiDescription = async (req: Request, res: Response) => {
-    try{
-        const {title} = req.body
-        if (!title){
+    try {
+        const { title } = req.body
+        if (!title) {
             return res.status(400).json({ message: "Title is required" })
         }
         const description = await generateArticleDescription(title)
-        res.status(200).json({description})
+        res.status(200).json({ description })
     }
     catch (err: any) {
         if (err.message) {
