@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
-import { UserModel } from "../models/user.model.ts"
+import { UserModel } from "../models/user.model"
 import bcrypt from "bcryptjs"
-import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken } from "../util/jwt.ts"
-import { AuthRequest } from "../middleware/auth.ts"
+import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken } from "../util/jwt"
+import { AuthRequest } from "../middleware/auth"
 
 export const register = async (req: Request, res: Response) => {
     try {
