@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "/vercel/path0/tsconfig.app.json" },
-    { "path": "/vercel/path0/tsconfig.node.json" }
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
   ]
 }
