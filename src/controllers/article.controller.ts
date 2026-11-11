@@ -112,7 +112,10 @@ export const getAllArticles = async (req: Request, res: Response) => {
             .skip(skip)
             .limit(limit)
 
-        const total = await ArticleModel.countDocuments({ isActive: isActive })
+        const total = await ArticleModel.countDocuments({ 
+            isActive: isActive,
+            $or: [{ gameNames: regex }, { tags: regex }, { title: regex }]
+         })
 
         res.status(200).json({
             data: articles,
@@ -319,16 +322,19 @@ export const getAllAdminArticles = async (req: AuthRequest, res: Response) => {
         const s = (req.query.search as string || "").trim()
         const fixed = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
         const regex = new RegExp(fixed, "i")
-
-        const articles = await ArticleModel.find({
-            $or: [{ title: regex }, { gameNames: regex }, { tag: regex }]
-        })
+        
+        const articles = await ArticleModel
+            .find({
+                $or: [{ gameNames: regex }, { tags: regex },{ title: regex }]
+            })
             .populate("author", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
 
-        const total = await ArticleModel.countDocuments({})
+        const total = await ArticleModel.countDocuments({
+            $or: [{ gameNames: regex }, { tags: regex },{ title: regex }]
+        })
 
         res.status(200).json({
             data: articles,
