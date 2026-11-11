@@ -2,13 +2,14 @@
 import express, { type Request, type Response } from "express"
 import mongoose from "mongoose"
 import cors from "cors"
+import dns from "node:dns"
 import AuthRouter from "./routes/auth.routers"
 import ArticleRouter from "./routes/article.routers"
 import CommentRouter from "./routes/comment.routers"
 import dotenv from "dotenv"
 dotenv.config()
 
-const MONGO_URL = process.env.MONGO_LOCAL_URL || ""
+const MONGO_URL = process.env.MONGO_URL || ""
 const PORT = process.env.PORT || 5000
 
 const app = express()
@@ -20,6 +21,8 @@ app.use("/api/v1/auth", AuthRouter)
 app.use("/api/v1/articles", ArticleRouter)
 app.use("/api/v1/comments", CommentRouter)
 
+dns.setServers(["8.8.8.8", "1.1.1.1"])          // fix the DNS issue when connecting DB to MongoDB Atlas
+
 mongoose
     .connect(MONGO_URL)
     .then(() => {
@@ -29,4 +32,4 @@ mongoose
             console.log(`Server is running on http://localhost:${PORT}`)
         })
     })
-    .catch((err) => console.log("Fail to connect DB..!"))
+    .catch((err) => console.log("Fail to connect DB..!\n",err))
