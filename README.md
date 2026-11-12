@@ -41,7 +41,7 @@ REST API for **GameHub**, a community where players read about video games and b
 | AI | Google Gemini API |
 | Hosting | Vercel (API), MongoDB Atlas (database) |
 
-## Project Structure (example)
+## Project Structure 
 
 ```text
 src/
